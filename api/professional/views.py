@@ -52,3 +52,19 @@ class WorkingPlanView(APIView):
 
         # Retornar os planos de trabalho serializados
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SetIntervalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            professional = Professional.objects.get(user=request.user)
+        except Professional.DoesNotExist:
+            return Response({"detail": "Usuário não tem um perfil de Profissional associado."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        professional.interval = request.data.get('interval', 30)
+        professional.save()
+
+        return Response(status=status.HTTP_200_OK)
