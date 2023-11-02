@@ -1,0 +1,44 @@
+version: '3'
+services:
+  django:
+    container_name: service_scheduler_django
+    image: python:latest
+    command: ./setup_dev.sh
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/home/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=PromoterApp.settings
+      - DJANGO_SUPERUSER_PASSWORD
+      - DJANGO_SUPERUSER_EMAIL
+      - DJANGO_SUPERUSER_USERNAME
+    tty: true
+    stdin_open: true
+    networks:
+      - service_scheduler_network
+
+  postgres-db:
+    container_name: service_scheduler_postgres
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # volumes:
+      # - ./database_dump.sql:/docker-entrypoint-initdb.d/database_dump.sql
+    networks:
+      - service_scheduler_network
+
+networks:
+  service_scheduler_network:
