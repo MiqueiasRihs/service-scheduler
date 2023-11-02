@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import authentication_classes, permission_classes
 
-from api.user_auth.serializer import SignUpSerializer, LoginSerializer
+from api.user_auth.serializers import SignUpSerializer, LoginSerializer
 
 @authentication_classes([])
 @permission_classes([AllowAny]) 

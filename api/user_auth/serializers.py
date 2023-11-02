@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
-from api.professional.models import Professionals
+from api.professional.models import Professional
 
 class SignUpSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
@@ -20,7 +20,7 @@ class SignUpSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        Professionals.objects.create(
+        Professional.objects.create(
             user=user,
             phone=validated_data['phone'],
         )

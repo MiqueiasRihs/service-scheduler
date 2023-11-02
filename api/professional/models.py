@@ -1,14 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 import uuid
 import random
 from unidecode import unidecode
 
-class Professionals(models.Model):
+class Professional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Profissional')
     store = models.CharField('Negócio', max_length=100, blank=True, null=True)
     phone = models.CharField('Telefone', max_length=15)
     interval = models.IntegerField('Intervalo', default=30)
@@ -35,4 +37,49 @@ class Professionals(models.Model):
         verbose_name = 'Profissional'
 
     def __str__(self):
-        return self.email
+        return self.user.username
+
+
+class WorkingPlan(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    day_of_week = models.IntegerField('Dia da semana')
+    start_time = models.TimeField('Hora de início')
+    end_time = models.TimeField('Hora de término')
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='working_plans')
+
+    class Meta:
+        db_table = 'working_plan'
+        verbose_name = 'Plano de trabalho'
+        verbose_name_plural = 'Planos de trabalho'
+
+    def __str__(self):
+        return self.id
+
+
+class BreakTime(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    start_time = models.TimeField('Hora de início')
+    end_time = models.TimeField('Hora de término')
+    working_plan = models.ForeignKey(WorkingPlan, on_delete=models.CASCADE, related_name='breaks')
+
+    class Meta:
+        verbose_name = 'Horário de pausa'
+        verbose_name_plural = 'Horários de pausa'
+
+    def __str__(self):
+        return f"{self.start_time} to {self.end_time}"
+
+
+class Service(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('Nome', max_length=100)
+    time = models.TimeField('Tempo')
+    value = models.FloatField('Valor', blank=True, null=True)
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='professional_services', verbose_name='Profissional')
+
+    class Meta:
+        verbose_name = 'Serviço'
+        verbose_name_plural = 'Serviços'
+
+    def __str__(self):
+        return self.name
