@@ -4,7 +4,7 @@ attempts=1
 max_attempts=10
 
 while [ $attempts -lt $max_attempts ]; do
-    if pg_isready -h tradex_postgres -p 5432 -U postgres -d tradex_promoter; then
+    if pg_isready -h service_scheduler_postgres -p 5432 -U postgres -d service_scheduler; then
         echo "\n================ Banco de dados está pronto, executando migrações... ================ \n"
         python3 manage.py makemigrations
         python3 manage.py migrate
