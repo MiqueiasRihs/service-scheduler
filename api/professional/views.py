@@ -33,3 +33,22 @@ class WorkingPlanView(APIView):
         # Serializar e retornar os objetos de working_plan criados
         response_serializer = WorkingPlanSerializer(created_plans, many=True, context={'request': request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+    def get(self, request):
+        user = request.user
+
+        try:
+            professional = Professional.objects.get(user=user)
+        except Professional.DoesNotExist:
+            return Response({"detail": "Usuário não tem um perfil de Profissional associado."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar os planos de trabalho associados ao profissional
+        working_plans = WorkingPlan.objects.filter(professional=professional)
+
+        # Serializar os planos de trabalho
+        serializer = WorkingPlanSerializer(working_plans, many=True, context={'request': request})
+
+        # Retornar os planos de trabalho serializados
+        return Response(serializer.data, status=status.HTTP_200_OK)
