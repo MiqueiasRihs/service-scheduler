@@ -8,9 +8,10 @@ import uuid
 import random
 from unidecode import unidecode
 
+
 class Professional(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Profissional')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Profissional', related_name='professional')
     store = models.CharField('Negócio', max_length=100, blank=True, null=True)
     phone = models.CharField('Telefone', max_length=15)
     interval = models.IntegerField('Intervalo', default=30)
@@ -60,9 +61,10 @@ class BreakTime(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     start_time = models.TimeField('Hora de início')
     end_time = models.TimeField('Hora de término')
-    working_plan = models.ForeignKey(WorkingPlan, on_delete=models.CASCADE, related_name='breaks')
+    working_plan = models.ForeignKey(WorkingPlan, on_delete=models.CASCADE, related_name='break_time')
 
     class Meta:
+        db_table = 'break_time'
         verbose_name = 'Horário de pausa'
         verbose_name_plural = 'Horários de pausa'
 
@@ -75,9 +77,10 @@ class Service(models.Model):
     name = models.CharField('Nome', max_length=100)
     time = models.TimeField('Tempo')
     value = models.FloatField('Valor', blank=True, null=True)
-    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='professional_services', verbose_name='Profissional')
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='service', verbose_name='Profissional')
 
     class Meta:
+        db_table = 'service'
         verbose_name = 'Serviço'
         verbose_name_plural = 'Serviços'
 
