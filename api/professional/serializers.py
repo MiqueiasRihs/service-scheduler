@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.professional.models import WorkingPlan, BreakTime, Professional
+from api.professional.models import WorkingPlan, BreakTime, Service, Professional
 
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,3 +38,12 @@ class WorkingPlanSerializer(serializers.ModelSerializer):
             BreakTime.objects.update_or_create(working_plan=working_plan, **break_data)
 
         return working_plan
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'name', 'time', 'value']
+
+    def create(self, validated_data):
+        return Service.objects.create(professional=self.context['professional'], **validated_data)
