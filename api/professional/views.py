@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from api.professional.models import Professional, WorkingPlan, Service
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer
-from api.professional.utils import SchedulerClass #calculate_total_time, get_available_times, 
+from api.utils.scheduler_class import SchedulerClass #calculate_total_time, get_available_times, 
 
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
