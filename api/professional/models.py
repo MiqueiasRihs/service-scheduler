@@ -44,8 +44,8 @@ class Professional(models.Model):
 class WorkingPlan(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     day_of_week = models.IntegerField('Dia da semana')
-    start_time = models.TimeField('Hora de início')
-    end_time = models.TimeField('Hora de término')
+    start_time = models.CharField('Hora de início')
+    end_time = models.CharField('Hora de término')
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='working_plans')
 
     class Meta:
@@ -54,13 +54,13 @@ class WorkingPlan(models.Model):
         verbose_name_plural = 'Planos de trabalho'
 
     def __str__(self):
-        return self.id
+        return f"Dia da semana {self.day_of_week} - {self.professional.user.username}"
 
 
 class BreakTime(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    start_time = models.TimeField('Hora de início')
-    end_time = models.TimeField('Hora de término')
+    start_time = models.CharField('Hora de início')
+    end_time = models.CharField('Hora de término')
     working_plan = models.ForeignKey(WorkingPlan, on_delete=models.CASCADE, related_name='break_time')
 
     class Meta:
@@ -86,3 +86,21 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Scheduling(models.Model):
+    token = models.CharField(max_length=255, db_index=True)
+    service_ids = models.JSONField()  # Assuming you're using PostgreSQL which has a native JSONB field
+    customer_name = models.CharField(max_length=255, db_index=True)
+    customer_phone = models.CharField(max_length=255, db_index=True)
+    schedule_date = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='scheduling')  # 'Professional' is another model you should define
+
+    class Meta:
+        db_table = 'scheduling'  # Defines the name of the table in the database
+        verbose_name = 'Agendamento'
+        verbose_name_plural = 'Agendamentos'
+
+    def __str__(self):
+        return f"Scheduling for {self.customer_name} on {self.schedule_date}"

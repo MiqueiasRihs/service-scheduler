@@ -47,3 +47,8 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Service.objects.create(professional=self.context['professional'], **validated_data)
+
+
+class CalculateServicesSerializer(serializers.Serializer):
+    services = serializers.ListField(child=serializers.UUIDField(), required=True)
+    date = serializers.DateField(required=True)
