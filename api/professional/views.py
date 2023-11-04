@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from api.professional.models import Professional, WorkingPlan, Service
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer
-from api.professional.utils import calculate_total_time, get_available_times
+from api.professional.utils import SchedulerClass #calculate_total_time, get_available_times, 
 
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
@@ -142,11 +142,18 @@ class AppointmentTimesAvailableView(APIView):
         except Professional.DoesNotExist:
             return Response({"detail": "Este profissional não esta cadastrado."},
                             status=status.HTTP_404_NOT_FOUND)
-
+            
         serializer = CalculateServicesSerializer(data=request.data)
+        scheduler = SchedulerClass(professional)
+
         if serializer.is_valid():
-            total_time_services = calculate_total_time(serializer.validated_data['services'])
-            available_times = get_available_times(request.data['date'], professional, total_time_services)
-            return Response(available_times, status=status.HTTP_200_OK)
+            try:
+                total_time_services = scheduler.calculate_total_time(serializer.validated_data['services'])
+                available_times = scheduler.get_available_times(request.data['date'], total_time_services)
+                return Response(available_times, status=status.HTTP_200_OK)
+            
+            except ValueError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
