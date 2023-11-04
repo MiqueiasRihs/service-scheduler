@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.professional.apps.ProfessionalConfig',
     'api.user_auth.apps.UserAuthConfig',
+    'api.customer.apps.CustomerConfig',
 ]
 
 MIDDLEWARE = [

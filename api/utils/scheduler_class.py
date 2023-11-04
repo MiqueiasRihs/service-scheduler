@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta, time
-from api.professional.models import Service, WorkingPlan, BreakTime, Scheduling
+
+from api.professional.models import Service, WorkingPlan, BreakTime
+
+from api.customer.models import Scheduling
+
 import math
 
 class SchedulerClass:
