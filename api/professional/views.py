@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from api.professional.models import Professional, WorkingPlan, Service
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer
@@ -16,8 +17,7 @@ class WorkingPlanView(APIView):
         try:
             professional = Professional.objects.get(user=user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
 
         created_plans = []
 
@@ -41,8 +41,7 @@ class WorkingPlanView(APIView):
         try:
             professional = Professional.objects.get(user=user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
 
         # Buscar os planos de trabalho associados ao profissional
         working_plans = WorkingPlan.objects.filter(professional=professional)
@@ -61,8 +60,7 @@ class SetIntervalView(APIView):
         try:
             professional = Professional.objects.get(user=request.user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
 
         professional.interval = request.data.get('interval', 30)
         professional.save()
@@ -77,8 +75,7 @@ class ServiceView(APIView):
         try:
             professional = Professional.objects.get(user=request.user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
 
         services = request.data
 
@@ -99,8 +96,7 @@ class ServiceView(APIView):
         try:
             professional = Professional.objects.get(user=request.user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
             
         all_services = Service.objects.filter(professional=professional)
         serializer = ServiceSerializer(all_services, many=True)
@@ -115,8 +111,7 @@ class UpdateServiceView(APIView):
         try:
             professional = Professional.objects.get(user=request.user)
         except Professional.DoesNotExist:
-            return Response({"detail": "Usuário não tem um perfil de Profissional associado."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return NotFound(detail="Este profissional não esta cadastrado.")
         
         try:
             service = Service.objects.get(id=service_id, professional=professional)
@@ -140,8 +135,7 @@ class AppointmentTimesAvailableView(APIView):
         try:
             professional = Professional.objects.get(slug=professional_slug)
         except Professional.DoesNotExist:
-            return Response({"detail": "Este profissional não esta cadastrado."},
-                            status=status.HTTP_404_NOT_FOUND)
+            return NotFound(detail="Este profissional não esta cadastrado")
             
         serializer = CalculateServicesSerializer(data=request.data)
         scheduler = SchedulerClass(professional)

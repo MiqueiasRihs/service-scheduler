@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, time
 
 from api.professional.models import Service, WorkingPlan, BreakTime
 
-from api.customer.models import Scheduling
+from api.customer.models import Scheduler
 
 import math
 
@@ -25,8 +25,8 @@ class SchedulerClass:
         return total_time
 
     def calculate_service_end_time(self, scheduling):
-        total_time = self.calculate_total_time(scheduling.services)
-        date_time_obj = datetime.strptime(scheduling.schedule_date, '%Y-%m-%d %H:%M:%S.%f')
+        total_time = self.calculate_total_time(scheduling['services'])
+        date_time_obj = datetime.strptime(scheduling['schedule_date'], '%Y-%m-%d %H:%M:%S.%f')
         total_time_delta = timedelta(hours=total_time.hour, minutes=total_time.minute)
         result_datetime = date_time_obj + total_time_delta
         return result_datetime.strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -37,7 +37,7 @@ class SchedulerClass:
         
         working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
         break_times = BreakTime.objects.filter(working_plan=working_plan)
-        schedules = Scheduling.objects.filter(schedule_date=date)
+        schedules = Scheduler.objects.filter(schedule_date=date)
         
         for schedule in schedules:
             start_time = schedule.schedule_date.strftime('%H:%M')
@@ -92,10 +92,10 @@ class SchedulerClass:
         return [time[0] for time in sequential_times]
 
     def is_available_schedule(self, scheduling):
-        datetime_obj = datetime.strptime(scheduling.schedule_date, "%Y-%m-%d %H:%M:%S.%f")
-        endtime_obj = datetime.strptime(scheduling.end_time, "%Y-%m-%d %H:%M:%S.%f")
+        datetime_obj = datetime.strptime(scheduling["schedule_date"], "%Y-%m-%d %H:%M:%S.%f")
+        endtime_obj = datetime.strptime(scheduling["end_time"], "%Y-%m-%d %H:%M:%S.%f")
         date_obj = datetime_obj.date().strftime("%Y-%m-%d")
-        total_time_services = self.calculate_total_time(scheduling.services)
+        total_time_services = self.calculate_total_time(scheduling["services"])
         available_times = self.get_available_times(date_obj, total_time_services)
         start_time = datetime_obj
 
