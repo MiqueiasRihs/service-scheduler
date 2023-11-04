@@ -4,7 +4,7 @@ from api.professional.models import Professional
 
 class Scheduler(models.Model):
     token = models.CharField(max_length=255, db_index=True)
-    service_ids = models.JSONField()  # Assuming you're using PostgreSQL which has a native JSONB field
+    services = models.JSONField()  # Assuming you're using PostgreSQL which has a native JSONB field
     customer_name = models.CharField(max_length=255, db_index=True)
     customer_phone = models.CharField(max_length=255, db_index=True)
     schedule_date = models.DateTimeField(db_index=True)

@@ -37,7 +37,7 @@ class SchedulerClass:
         
         working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
         break_times = BreakTime.objects.filter(working_plan=working_plan)
-        schedules = Scheduler.objects.filter(schedule_date=date)
+        schedules = Scheduler.objects.filter(schedule_date__date=date)
         
         for schedule in schedules:
             start_time = schedule.schedule_date.strftime('%H:%M')
