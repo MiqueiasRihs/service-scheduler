@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from api.professional.serializers import ServiceSerializer
+
+
 class BaseSchedulerSerializer(serializers.Serializer):
     schedule_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     services = serializers.ListField(
@@ -8,3 +11,9 @@ class BaseSchedulerSerializer(serializers.Serializer):
     )
     customer_name = serializers.CharField(max_length=100)
     customer_phone = serializers.CharField(max_length=20)
+
+
+class ClientScheduleSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    schedule_date = serializers.DateTimeField()
+    services = ServiceSerializer(many=True)

@@ -7,8 +7,9 @@ from api.professional.models import Professional, Service
 
 from api.utils.scheduler_class import SchedulerClass
 
-from api.customer.serializers import BaseSchedulerSerializer
 from api.customer.models import Scheduler
+from api.customer.utils import get_schedule_data_client
+from api.customer.serializers import BaseSchedulerSerializer, ClientScheduleSerializer
 
 class SchedulerCreateView(APIView):
     def post(self, request, professional_slug):
@@ -40,3 +41,12 @@ class SchedulerCreateView(APIView):
         Scheduler.objects.create(**scheduling_data)
 
         return JsonResponse({"message": "Agendamento criado com sucesso."}, status=status.HTTP_201_CREATED)
+
+
+class GetSchedulerCustomerView(APIView):
+    
+    def get(self, request, phone):
+        schedules = get_schedule_data_client(phone)
+        serializer = ClientScheduleSerializer(schedules, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
