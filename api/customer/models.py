@@ -2,13 +2,16 @@ from django.db import models
 
 from api.professional.models import Professional
 
+import uuid
+
 class Scheduler(models.Model):
-    token = models.CharField(max_length=255, db_index=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.CharField(max_length=255)
     services = models.JSONField()  # Assuming you're using PostgreSQL which has a native JSONB field
-    customer_name = models.CharField(max_length=255, db_index=True)
-    customer_phone = models.CharField(max_length=255, db_index=True)
-    schedule_date = models.DateTimeField(db_index=True)
-    end_time = models.DateTimeField(db_index=True)
+    customer_name = models.CharField(max_length=255)
+    customer_phone = models.CharField(max_length=255)
+    schedule_date = models.DateTimeField()
+    end_time = models.DateTimeField()
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='scheduling')  # 'Professional' is another model you should define
 
     class Meta:

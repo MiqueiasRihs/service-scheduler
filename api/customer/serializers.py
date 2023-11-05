@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 class BaseSchedulerSerializer(serializers.Serializer):
-    schedule_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f")
+    schedule_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     services = serializers.ListField(
         child=serializers.IntegerField(min_value=1), 
         allow_empty=False
