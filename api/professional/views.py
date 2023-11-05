@@ -142,8 +142,7 @@ class AppointmentTimesAvailableView(APIView):
 
         if serializer.is_valid():
             try:
-                total_time_services = scheduler.calculate_total_time(serializer.validated_data['services'])
-                available_times = scheduler.get_available_times(request.data['date'], total_time_services)
+                available_times = scheduler.get_available_times(request.data['date'])
                 return Response(available_times, status=status.HTTP_200_OK)
             
             except ValueError as e:

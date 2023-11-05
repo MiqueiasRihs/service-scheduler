@@ -7,12 +7,16 @@ ENV LANG pt_BR.UTF-8
 ENV LANGUAGE pt_BR:pt
 ENV LC_ALL pt_BR.UTF-8
 
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /home/app
 
 COPY . .
 
 RUN apt-get update && \
 	apt-get install postgresql-client -y && \
+	apt-get install -y tzdata && \
 	apt-get install sudo git nano curl gnupg build-essential libpq-dev \
 	libjpeg8-dev zlib1g-dev libtiff-dev libfreetype6 libfreetype6-dev \
 	libwebp-dev libopenjp2-7-dev -y python3-pip \

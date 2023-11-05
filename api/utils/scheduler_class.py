@@ -72,6 +72,7 @@ class SchedulerClass:
                 available_times.append(current_time.strftime('%H:%M'))
             current_time += interval
         
+        print(available_times)
         return available_times
 
 
