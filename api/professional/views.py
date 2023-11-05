@@ -5,8 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 from api.professional.models import Professional, WorkingPlan, Service
-from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer
-from api.utils.scheduler_class import SchedulerClass #calculate_total_time, get_available_times, 
+from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
+    ScheduleSerializer
+from api.utils.scheduler_class import SchedulerClass
+
+from api.professional.utils import get_schedule_data_professional
 
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
@@ -150,3 +153,19 @@ class AppointmentTimesAvailableView(APIView):
 
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ScheduleListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, schedule_date):
+        try:
+            professional = Professional.objects.get(user=request.user)
+        except Professional.DoesNotExist:
+            return NotFound(detail="Este profissional não esta cadastrado")
+
+        schedules = get_schedule_data_professional(professional.id, schedule_date)
+        serializer = ScheduleSerializer(schedules, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

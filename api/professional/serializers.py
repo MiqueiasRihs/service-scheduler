@@ -52,3 +52,12 @@ class ServiceSerializer(serializers.ModelSerializer):
 class CalculateServicesSerializer(serializers.Serializer):
     services = serializers.ListField(child=serializers.UUIDField(), required=True)
     date = serializers.DateField(required=True)
+
+
+class ScheduleSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    customer_name = serializers.CharField(max_length=255)
+    customer_phone = serializers.CharField(max_length=20)
+    schedule_date = serializers.DateTimeField()
+    end_time = serializers.DateTimeField()
+    services = ServiceSerializer(many=True)
