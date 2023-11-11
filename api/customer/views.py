@@ -60,3 +60,12 @@ class GetSchedulerCustomerView(APIView):
         serializer = ClientScheduleSerializer(schedules, many=True)
         
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class DeleteSchedulerCustomerView(APIView):
+    
+    def delete(self, request, id):
+        schedules = get_schedule_data_client(phone)
+        serializer = ClientScheduleSerializer(schedules, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)

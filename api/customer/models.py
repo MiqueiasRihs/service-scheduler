@@ -3,6 +3,8 @@ from django.contrib.postgres.fields import ArrayField
 
 from api.professional.models import Professional
 
+from api.customer.constants import SchedulerStatus, SCHEDULER_STATUS_CHOICES
+
 import uuid
 
 class Scheduler(models.Model):
@@ -13,6 +15,7 @@ class Scheduler(models.Model):
     schedule_date = models.DateTimeField()
     end_time = models.DateTimeField()
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='scheduling')  # 'Professional' is another model you should define
+    status = models.SmallIntegerField(choices=SCHEDULER_STATUS_CHOICES, verbose_name='Status', default=SchedulerStatus.SCHEDULED)
 
     class Meta:
         db_table = 'scheduler'
