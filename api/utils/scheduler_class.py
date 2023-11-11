@@ -39,6 +39,8 @@ class SchedulerClass:
         unavailable_hours = []
         data_datetime = datetime.strptime(date, "%Y-%m-%d")
         
+        print("WEEKDAY ", data_datetime.weekday())
+        
         working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
         break_times = BreakTime.objects.filter(working_plan=working_plan)
         schedules = Scheduler.objects.filter(schedule_date__date=date, professional=self.professional)

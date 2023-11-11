@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,35 +15,42 @@ from api.customer.serializers import BaseSchedulerSerializer, ClientScheduleSeri
 
 class SchedulerCreateView(APIView):
     def post(self, request, professional_slug):
-        serializer = BaseSchedulerSerializer(data=request.data)
-        if serializer.is_valid():
-            scheduling_data = serializer.validated_data
-
-        try:
-            professional = Professional.objects.get(slug=professional_slug)
-        except Professional.DoesNotExist:
-            raise NotFound(detail="Este profissional não está cadastrado.")
+        data = request.data
+        
+        professional = get_object_or_404(Professional, slug=professional_slug)
+        data['professional'] = professional.id
 
         scheduler = SchedulerClass(professional)
-        scheduling_data = request.data
-        scheduling_data['professional_id'] = professional.id
-
         try:
-            scheduling_data['end_time'] = scheduler.calculate_service_end_time(scheduling_data)
+            data['end_time'] = scheduler.calculate_service_end_time(data)
+            self.validate_services(data['services'], professional)
+            self.check_availability(scheduler, data)
         except ValueError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except NotFound as e:
+            return Response({'error': str(e.detail)}, status=status.HTTP_404_NOT_FOUND)
+        except PermissionDenied as e:
+            return Response({'error': str(e.detail)}, status=status.HTTP_403_FORBIDDEN)
 
-        for service_id in scheduling_data.get('services', []):
+        serializer = BaseSchedulerSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        scheduling_data = serializer.validated_data
+
+        Scheduler.objects.create(**scheduling_data)
+        return Response({"message": "Agendamento criado com sucesso."}, status=status.HTTP_201_CREATED)
+
+
+    def validate_services(self, services, professional):
+        for service_id in services:
             if not Service.objects.filter(id=service_id, professional=professional).exists():
                 raise NotFound(detail="Um dos serviços selecionados não pertence ao profissional em questão.")
 
+
+    def check_availability(self, scheduler, scheduling_data):
         if not scheduler.is_available_schedule(scheduling_data):
             raise PermissionDenied(detail="Horário indisponível para agendamento.")
-        
-        Scheduler.objects.create(**scheduling_data)
-
-        return JsonResponse({"message": "Agendamento criado com sucesso."}, status=status.HTTP_201_CREATED)
-
 
 class GetSchedulerCustomerView(APIView):
     
