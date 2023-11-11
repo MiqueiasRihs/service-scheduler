@@ -52,6 +52,7 @@ class SchedulerCreateView(APIView):
         if not scheduler.is_available_schedule(scheduling_data):
             raise PermissionDenied(detail="Horário indisponível para agendamento.")
 
+
 class GetSchedulerCustomerView(APIView):
     
     def get(self, request, phone):
