@@ -10,6 +10,7 @@ from api.professional.models import Professional, Service
 from api.utils.scheduler_class import SchedulerClass
 
 from api.customer.models import Scheduler
+from api.customer.constants import SchedulerStatus
 from api.customer.utils import get_schedule_data_client
 from api.customer.serializers import BaseSchedulerSerializer, ClientScheduleSerializer
 
@@ -62,10 +63,11 @@ class GetSchedulerCustomerView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
-class DeleteSchedulerCustomerView(APIView):
-    
-    def delete(self, request, id):
-        schedules = get_schedule_data_client(phone)
-        serializer = ClientScheduleSerializer(schedules, many=True)
+class CancelSchedulerCustomerView(APIView):
+    def patch(self, request, id):
+        schedule = get_object_or_404(Scheduler, id=id)
+
+        schedule.status = SchedulerStatus.CANCELED
+        schedule.save()
         
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"message": "Agendamento cancelado"}, status=status.HTTP_200_OK)

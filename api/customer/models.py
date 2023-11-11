@@ -23,4 +23,4 @@ class Scheduler(models.Model):
         verbose_name_plural = 'Agendamentos'
 
     def __str__(self):
-        return f"Scheduler for {self.customer_name} on {self.schedule_date}"
+        return f"{self.customer_name} em {self.schedule_date}"
