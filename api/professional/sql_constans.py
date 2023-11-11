@@ -26,3 +26,34 @@ GET_SCHEDULE_DATA_PROFESSIONAL = """
         AND DATE(sched.schedule_date) = %(schedule_date)s
     GROUP BY sched.id, prof.id;
 """
+
+
+GET_PROFESSIONAL_DATA = """
+    SELECT 
+        au.first_name,
+        au.username,
+        prof.store,
+        prof.phone,
+        prof.slug,
+        prof.profile_image_path,
+        ARRAY_AGG(all_serv.services) AS services
+    FROM professional AS prof
+    LEFT JOIN auth_user AS au
+        ON au.id = prof.user_id
+    LEFT JOIN (
+        SELECT 
+            serv.professional_id,
+            json_build_object(
+                'id', serv.id,
+                'name', serv."name",
+                'time', serv."time",
+                'value', serv.value
+            ) AS services
+        FROM service as serv
+        GROUP BY serv.id
+    ) AS all_serv ON all_serv.professional_id = prof.id 
+    WHERE 1=1
+        AND prof.id = %(professional_id)s
+        -- AND prof.id = 'a9fcaf4e-b185-46e4-804c-ac869ea4fd1e'
+    GROUP BY au.id, prof.id, all_serv.professional_id;
+"""

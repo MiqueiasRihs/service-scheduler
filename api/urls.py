@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from api.professional.views import ProfessionalData
 
 urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -10,4 +13,6 @@ urlpatterns = [
     path('auth/', include("api.user_auth.urls")),
     path('customer/', include("api.customer.urls")),
     path('professional/', include("api.professional.urls")),
+    
+    path('<slug:professional_slug>/', ProfessionalData.as_view(), name='professional_data'),
 ]

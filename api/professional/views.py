@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,7 +11,14 @@ from api.professional.serializers import WorkingPlanSerializer, ServiceSerialize
     ScheduleSerializer
 from api.utils.scheduler_class import SchedulerClass
 
-from api.professional.utils import get_schedule_data_professional
+from api.professional.utils import get_schedule_data_professional, get_professional_data
+
+class ProfessionalData(APIView):
+    def get(self, request, professional_slug):
+        professional = get_object_or_404(Professional, slug=professional_slug)
+        data = get_professional_data(professional.id)
+        return Response(data, status=status.HTTP_200_OK)
+
 
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
