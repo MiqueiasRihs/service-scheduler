@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'professional']
+        fields = ['email', 'first_name', 'professional']
 
     def get_professional(self, user):
         # Presumindo que um usuário só tem um perfil Professional
@@ -29,6 +29,7 @@ class SignUpSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     email = serializers.EmailField(max_length=250)
     phone = serializers.CharField(max_length=15)
+    instagram = serializers.CharField(max_length=100)
     password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
@@ -50,6 +51,7 @@ class SignUpSerializer(serializers.Serializer):
         Professional.objects.create(
             user=user,
             phone=validated_data['phone'],
+            instagram=validated_data['instagram'],
         )
         return user
 

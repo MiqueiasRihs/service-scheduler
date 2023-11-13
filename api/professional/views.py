@@ -19,17 +19,11 @@ class ProfessionalData(APIView):
         data = get_professional_data(professional.id)
         return Response(data, status=status.HTTP_200_OK)
 
-
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user = request.user
-
-        try:
-            professional = Professional.objects.get(user=user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
+        professional = get_object_or_404(Professional, user=request.user)
 
         created_plans = []
 
@@ -48,12 +42,7 @@ class WorkingPlanView(APIView):
     
     
     def get(self, request):
-        user = request.user
-
-        try:
-            professional = Professional.objects.get(user=user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
+        professional = get_object_or_404(Professional, user=request.user)
 
         # Buscar os planos de trabalho associados ao profissional
         working_plans = WorkingPlan.objects.filter(professional=professional)
@@ -69,11 +58,7 @@ class SetIntervalView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        try:
-            professional = Professional.objects.get(user=request.user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
-
+        professional = get_object_or_404(Professional, user=request.user)
         professional.interval = request.data.get('interval', 30)
         professional.save()
 
@@ -84,11 +69,8 @@ class ServiceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        try:
-            professional = Professional.objects.get(user=request.user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
-
+        print(request.data)
+        professional = get_object_or_404(Professional, user=request.user)
         services = request.data
 
         # Criar serviços
@@ -105,11 +87,7 @@ class ServiceView(APIView):
     
     
     def get(self, request):
-        try:
-            professional = Professional.objects.get(user=request.user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
-            
+        professional = get_object_or_404(Professional, user=request.user)
         all_services = Service.objects.filter(professional=professional)
         serializer = ServiceSerializer(all_services, many=True)
 
@@ -120,10 +98,7 @@ class UpdateServiceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, service_id):
-        try:
-            professional = Professional.objects.get(user=request.user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado.")
+        professional = get_object_or_404(Professional, user=request.user)
         
         try:
             service = Service.objects.get(id=service_id, professional=professional)
@@ -144,11 +119,7 @@ class AppointmentTimesAvailableView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, professional_slug):
-        try:
-            professional = Professional.objects.get(slug=professional_slug)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado")
-            
+        professional = get_object_or_404(Professional, slug=professional_slug)
         serializer = CalculateServicesSerializer(data=request.data)
         scheduler = SchedulerClass(professional)
 
@@ -168,11 +139,7 @@ class ScheduleListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, schedule_date):
-        try:
-            professional = Professional.objects.get(user=request.user)
-        except Professional.DoesNotExist:
-            return NotFound(detail="Este profissional não esta cadastrado")
-
+        professional = get_object_or_404(Professional, user=request.user)
         schedules = get_schedule_data_professional(professional.id, schedule_date)
         serializer = ScheduleSerializer(schedules, many=True)
         

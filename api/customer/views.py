@@ -55,7 +55,6 @@ class SchedulerCreateView(APIView):
 
 
 class GetSchedulerCustomerView(APIView):
-    
     def get(self, request, phone):
         schedules = get_schedule_data_client(phone)
         serializer = ClientScheduleSerializer(schedules, many=True)
