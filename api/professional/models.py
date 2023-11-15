@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
+from api.professional.constants import HolidayType, HOLIDAY_TYPE_CHOICES
 
 import uuid
 import random
@@ -86,3 +86,19 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Holiday(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, verbose_name="Nome do Feriado")
+    date = models.DateField(verbose_name="Data")
+    holiday_type = models.SmallIntegerField(choices=HOLIDAY_TYPE_CHOICES, default=HolidayType.FULL_DAY, verbose_name="Tipo de Feriado")
+    start_time = models.CharField('Hora de início', blank=True, null=True)
+    end_time = models.CharField('Hora de término', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Feriado"
+        verbose_name_plural = "Feriados"

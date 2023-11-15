@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.professional.models import WorkingPlan, BreakTime, Service, Professional
+from api.professional.models import WorkingPlan, BreakTime, Service, Holiday
 
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +61,9 @@ class ScheduleSerializer(serializers.Serializer):
     schedule_date = serializers.DateTimeField()
     end_time = serializers.DateTimeField()
     services = ServiceSerializer(many=True)
+
+
+class HolidaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Holiday
+        fields = '__all__'
