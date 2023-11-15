@@ -1,15 +1,15 @@
 from django.shortcuts import get_object_or_404
 
+from rest_framework import status
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound, PermissionDenied
 
-from api.professional.models import Professional, WorkingPlan, Service
-from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer
 from api.utils.scheduler_class import SchedulerClass
+from api.professional.models import Professional, WorkingPlan, Service, Holiday
+from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
+    ScheduleSerializer, HolidaySerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
@@ -162,3 +162,27 @@ class ScheduleListView(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class HolidayCreate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        serializer = HolidaySerializer(data=request.data, context={'request': request, 'professional': professional})
+
+        if serializer.is_valid():
+            serializer.save(professional=professional)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer
+
+class HolidayUpdate(generics.UpdateAPIView):
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer
+
+class HolidayDelete(generics.DestroyAPIView):
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer

@@ -47,6 +47,8 @@ class WorkingPlan(models.Model):
     start_time = models.CharField('Hora de início')
     end_time = models.CharField('Hora de término')
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='working_plans')
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
 
     class Meta:
         db_table = 'working_plan'
@@ -62,6 +64,8 @@ class BreakTime(models.Model):
     start_time = models.CharField('Hora de início')
     end_time = models.CharField('Hora de término')
     working_plan = models.ForeignKey(WorkingPlan, on_delete=models.CASCADE, related_name='break_time')
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
 
     class Meta:
         db_table = 'break_time'
@@ -78,6 +82,8 @@ class Service(models.Model):
     time = models.TimeField('Tempo')
     value = models.FloatField('Valor', blank=True, null=True)
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='service', verbose_name='Profissional')
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
 
     class Meta:
         db_table = 'service'
@@ -92,13 +98,18 @@ class Holiday(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, verbose_name="Nome do Feriado")
     date = models.DateField(verbose_name="Data")
-    holiday_type = models.SmallIntegerField(choices=HOLIDAY_TYPE_CHOICES, default=HolidayType.FULL_DAY, verbose_name="Tipo de Feriado")
     start_time = models.CharField('Hora de início', blank=True, null=True)
     end_time = models.CharField('Hora de término', blank=True, null=True)
+    every_year = models.BooleanField(default=True)
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='holidays', verbose_name='Profissional')
+    holiday_type = models.SmallIntegerField(choices=HOLIDAY_TYPE_CHOICES, default=HolidayType.FULL_DAY, verbose_name="Tipo de Feriado")
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
+        db_table = 'holiday'
         verbose_name = "Feriado"
         verbose_name_plural = "Feriados"

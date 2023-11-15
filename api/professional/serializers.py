@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from api.professional.models import WorkingPlan, BreakTime, Service, Holiday
+from api.professional.constants import HolidayType
 
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -67,3 +68,33 @@ class HolidaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Holiday
         fields = '__all__'
+        extra_kwargs = {'professional': {'write_only': True, 'required': False}}
+
+    def validate(self, data):
+        # Extrair dia e mês da data do feriado
+        holiday_date = data['date']
+        day = holiday_date.day
+        month = holiday_date.month
+
+        # Verificar se existe um feriado com a mesma data (dia e mês) e professional
+        existing_holidays = Holiday.objects.filter(
+            date__month=month, 
+            date__day=day, 
+            professional=self.context['professional']
+        )
+
+        if existing_holidays.exists():
+            raise serializers.ValidationError({
+                'message': 'Já existe um feriado cadastrado para essa data para o profissional selecionado.'
+            })
+            
+        if data['holiday_type'] == HolidayType.HALF_DAY:
+            if not data.get('start_time') or not data.get('end_time'):
+                raise serializers.ValidationError({
+                    "message":"Para feriados de meio horário, a hora de inicio e hora de término são obrigatórios."
+                })
+
+        return data
+
+    def create(self, validated_data):
+        return Holiday.objects.create(**validated_data)

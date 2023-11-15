@@ -16,6 +16,8 @@ class Scheduler(models.Model):
     end_time = models.DateTimeField()
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='scheduling')  # 'Professional' is another model you should define
     status = models.SmallIntegerField(choices=SCHEDULER_STATUS_CHOICES, verbose_name='Status', default=SchedulerStatus.SCHEDULED)
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
 
     class Meta:
         db_table = 'scheduler'

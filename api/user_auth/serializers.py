@@ -29,7 +29,7 @@ class SignUpSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     email = serializers.EmailField(max_length=250)
     phone = serializers.CharField(max_length=15)
-    instagram = serializers.CharField(max_length=100)
+    instagram = serializers.CharField(max_length=100, required=False)
     password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
@@ -51,7 +51,7 @@ class SignUpSerializer(serializers.Serializer):
         Professional.objects.create(
             user=user,
             phone=validated_data['phone'],
-            instagram=validated_data['instagram'],
+            # instagram=validated_data['instagram'] if validated_data["instagram"] else '',
         )
         return user
 
