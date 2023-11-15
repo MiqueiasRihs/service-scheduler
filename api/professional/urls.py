@@ -14,8 +14,8 @@ urlpatterns = [
     path('service/<uuid:service_id>/delete/', DeleteServiceView.as_view(), name='service-delete'),
 
     path('holidays/create/', HolidayCreate.as_view(), name='holiday-create'),
-    path('holidays/<int:pk>/update/', HolidayUpdate.as_view(), name='holiday-update'),
-    path('holidays/<int:pk>/delete/', HolidayDelete.as_view(), name='holiday-delete'),
+    path('holidays/<uuid:holiday_id>/update/', HolidayUpdate.as_view(), name='holiday-update'),
+    path('holidays/<uuid:holiday_id>/delete/', HolidayDelete.as_view(), name='holiday-delete'),
 
     path('<str:professional_slug>/appointment-times-available/', AppointmentTimesAvailableView.as_view(), name='appointment-times-available'),
     path('schedules/<str:schedule_date>/', ScheduleListView.as_view(), name='schedules'),

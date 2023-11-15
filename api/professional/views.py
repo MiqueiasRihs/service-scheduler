@@ -175,13 +175,25 @@ class HolidayCreate(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        
-    queryset = Holiday.objects.all()
-    serializer_class = HolidaySerializer
 
-class HolidayUpdate(generics.UpdateAPIView):
-    queryset = Holiday.objects.all()
-    serializer_class = HolidaySerializer
+class HolidayUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, holiday_id):
+        holiday = get_object_or_404(Holiday, id=holiday_id)
+        professional = get_object_or_404(Professional, user=request.user)
+
+        # Verifica se o profissional que está fazendo a requisição é o mesmo associado ao feriado
+        if holiday.professional != professional:
+            return Response({'message': 'Você não tem permissão para atualizar este feriado.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = HolidaySerializer(holiday, data=request.data, context={'professional': professional, 'instance': holiday})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class HolidayDelete(generics.DestroyAPIView):
     queryset = Holiday.objects.all()

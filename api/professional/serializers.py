@@ -77,13 +77,17 @@ class HolidaySerializer(serializers.ModelSerializer):
         month = holiday_date.month
 
         # Verificar se existe um feriado com a mesma data (dia e mês) e professional
-        existing_holidays = Holiday.objects.filter(
+        query = Holiday.objects.filter(
             date__month=month, 
             date__day=day, 
             professional=self.context['professional']
         )
 
-        if existing_holidays.exists():
+        if 'instance' in self.context:
+            query = query.exclude(pk=self.context['instance'].pk)
+
+        # Verificar se existem feriados duplicados
+        if query.exists():
             raise serializers.ValidationError({
                 'message': 'Já existe um feriado cadastrado para essa data para o profissional selecionado.'
             })
