@@ -195,6 +195,16 @@ class HolidayUpdate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class HolidayDelete(generics.DestroyAPIView):
-    queryset = Holiday.objects.all()
-    serializer_class = HolidaySerializer
+class HolidayDelete(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, holiday_id):
+        holiday = get_object_or_404(Holiday, id=holiday_id)
+        professional = get_object_or_404(Professional, user=request.user)
+
+        # Verifica se o profissional que está fazendo a requisição é o mesmo associado ao feriado
+        if holiday.professional != professional:
+            return Response({'message': 'Você não tem permissão para deletar este feriado.'}, status=status.HTTP_403_FORBIDDEN)
+
+        holiday.delete()
+        return Response({'message': 'Feriado deletado com sucesso.'}, status=status.HTTP_204_NO_CONTENT)
