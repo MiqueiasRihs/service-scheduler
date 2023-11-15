@@ -65,10 +65,15 @@ class ScheduleSerializer(serializers.Serializer):
 
 
 class HolidaySerializer(serializers.ModelSerializer):
+    holiday_type_description = serializers.SerializerMethodField()
+
     class Meta:
         model = Holiday
         fields = '__all__'
         extra_kwargs = {'professional': {'write_only': True, 'required': False}}
+
+    def get_holiday_type_description(self, obj):
+        return obj.get_holiday_type_display()
 
     def validate(self, data):
         # Extrair dia e mês da data do feriado

@@ -2,7 +2,7 @@ from django.urls import path
 
 from api.professional.views import WorkingPlanView, SetIntervalView, ServiceView, \
     UpdateServiceView, DeleteServiceView, AppointmentTimesAvailableView, ScheduleListView, \
-    HolidayCreate, HolidayUpdate, HolidayDelete
+    HolidayList, HolidayCreate, HolidayUpdate, HolidayDelete
 
 urlpatterns = [
     path('working-plan/', WorkingPlanView.as_view(), name='working-plan'),
@@ -13,6 +13,7 @@ urlpatterns = [
     path('service/<uuid:service_id>/update/', UpdateServiceView.as_view(), name='service-update'),
     path('service/<uuid:service_id>/delete/', DeleteServiceView.as_view(), name='service-delete'),
 
+    path('holidays/', HolidayList.as_view(), name='holiday-list'),
     path('holidays/create/', HolidayCreate.as_view(), name='holiday-create'),
     path('holidays/<uuid:holiday_id>/update/', HolidayUpdate.as_view(), name='holiday-update'),
     path('holidays/<uuid:holiday_id>/delete/', HolidayDelete.as_view(), name='holiday-delete'),

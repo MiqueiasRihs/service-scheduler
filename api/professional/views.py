@@ -174,6 +174,16 @@ class HolidayCreate(APIView):
             serializer.save(professional=professional)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class HolidayList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        holidays = Holiday.objects.filter(professional=professional)
+        serializer = HolidaySerializer(holidays, many=True)
+        return Response(serializer.data)
         
 
 class HolidayUpdate(APIView):
