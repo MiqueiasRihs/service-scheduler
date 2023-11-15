@@ -103,7 +103,7 @@ class UpdateServiceView(APIView):
         try:
             service = Service.objects.get(id=service_id, professional=professional)
         except Service.DoesNotExist:
-            return Response({"detail": f"O horário de trabalho não foi encontrado para este usuário. \
+            return Response({"message": f"O horário de trabalho não foi encontrado para este usuário. \
                                          Verifique se o ID do horário de trabalho está correto ou se pertence ao usuário autenticado."},
                             status=status.HTTP_404_NOT_FOUND)
 
@@ -113,6 +113,23 @@ class UpdateServiceView(APIView):
             return Response({"message": "O serviço foi atualizado com sucesso"}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class DeleteServiceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, service_id):
+        professional = get_object_or_404(Professional, user=request.user)
+        
+        try:
+            service = Service.objects.get(id=service_id, professional=professional)
+        except Service.DoesNotExist:
+            return Response({"detail": f"O horário de trabalho não foi encontrado para este usuário. \
+                                         Verifique se o ID do horário de trabalho está correto ou se pertence ao usuário autenticado."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        service.delete()
+        return Response({"message": "O serviço foi deletado com sucesso"}, status=status.HTTP_200_OK)
 
 
 class AppointmentTimesAvailableView(APIView):
