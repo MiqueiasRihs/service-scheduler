@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, time
 
-from api.professional.models import Service, WorkingPlan, BreakTime
+from api.professional.models import Service, WorkingPlan, BreakTime, Holiday
+from api.professional.constants import HolidayType
 
 from api.customer.models import Scheduler
 
@@ -39,22 +40,28 @@ class SchedulerClass:
         unavailable_hours = []
         data_datetime = datetime.strptime(date, "%Y-%m-%d")
         
-        print("WEEKDAY ", data_datetime.weekday())
-        
-        working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
-        break_times = BreakTime.objects.filter(working_plan=working_plan)
+        print("WEEKDAY >>> ", data_datetime.weekday())
+
+        holiday = Holiday.objects.filter(date=data_datetime).first()
+        if holiday and holiday.holiday_type == HolidayType.FULL_DAY:
+            return []
+        elif holiday and holiday.holiday_type == HolidayType.HALF_DAY:
+            working_plan = holiday
+        else:
+            working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
+
+            break_times = BreakTime.objects.filter(working_plan=working_plan)
+            for break_time in break_times:
+                unavailable_hours.append(
+                    (datetime.strptime(break_time.start_time, '%H:%M'), datetime.strptime(break_time.end_time, '%H:%M'))
+                )
+
         schedules = Scheduler.objects.filter(schedule_date__date=date, professional=self.professional)
-        
         for schedule in schedules:
             start_time = schedule.schedule_date.strftime('%H:%M')
             end_time = schedule.end_time.strftime('%H:%M')
             unavailable_hours.append(
                 (datetime.strptime(start_time, '%H:%M'), datetime.strptime(end_time, '%H:%M'))
-            )
-
-        for break_time in break_times:
-            unavailable_hours.append(
-                (datetime.strptime(break_time.start_time, '%H:%M'), datetime.strptime(break_time.end_time, '%H:%M'))
             )
 
         start_time = datetime.strptime(working_plan.start_time, '%H:%M')
