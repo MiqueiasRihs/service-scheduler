@@ -3,6 +3,8 @@ from rest_framework import serializers
 from api.professional.models import WorkingPlan, BreakTime, Service, Holiday
 from api.professional.constants import HolidayType
 
+from api.utils.utils import to_money
+
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BreakTime
@@ -45,6 +47,11 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'name', 'time', 'value']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['time'] = instance.time.strftime("%H:%M") if instance.time else None
+        return representation
 
     def create(self, validated_data):
         return Service.objects.create(professional=self.context['professional'], **validated_data)
