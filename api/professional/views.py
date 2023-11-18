@@ -184,7 +184,7 @@ class HolidayList(APIView):
         holidays = Holiday.objects.filter(professional=professional)
         serializer = HolidaySerializer(holidays, many=True)
         return Response(serializer.data)
-        
+
 
 class HolidayUpdate(APIView):
     permission_classes = [IsAuthenticated]
@@ -217,4 +217,4 @@ class HolidayDelete(APIView):
             return Response({'message': 'Você não tem permissão para deletar este feriado.'}, status=status.HTTP_403_FORBIDDEN)
 
         holiday.delete()
-        return Response({'message': 'Feriado deletado com sucesso.'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
