@@ -48,7 +48,10 @@ class SchedulerClass:
         elif holiday and holiday.holiday_type == HolidayType.HALF_DAY:
             working_plan = holiday
         else:
-            working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
+            try:
+                working_plan = WorkingPlan.objects.get(day_of_week=data_datetime.weekday(), professional=self.professional)
+            except WorkingPlan.DoesNotExist:
+                return []
 
             break_times = BreakTime.objects.filter(working_plan=working_plan)
             for break_time in break_times:

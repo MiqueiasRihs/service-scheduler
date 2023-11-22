@@ -19,6 +19,7 @@ class ProfessionalData(APIView):
         data = get_professional_data(professional.id)
         return Response(data, status=status.HTTP_200_OK)
 
+
 class WorkingPlanView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -26,8 +27,8 @@ class WorkingPlanView(APIView):
         professional = get_object_or_404(Professional, user=request.user)
 
         created_plans = []
-
-        # Validar e criar os planos de trabalho
+        
+        WorkingPlan.objects.filter(professional=professional).delete()
         for plan_data in request.data:
             serializer = WorkingPlanSerializer(data=plan_data, context={'request': request})
             if serializer.is_valid():
@@ -71,19 +72,16 @@ class ServiceView(APIView):
     def post(self, request):
         print(request.data)
         professional = get_object_or_404(Professional, user=request.user)
-        services = request.data
+        service = request.data
 
         # Criar serviços
-        created_services = []
-        for service_data in services:
-            serializer = ServiceSerializer(data=service_data, context={'professional': professional})
-            if serializer.is_valid():
-                serializer.save()
-                created_services.append(serializer.data)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ServiceSerializer(data=service, context={'professional': professional})
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(created_services, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     
     def get(self, request):
@@ -110,7 +108,7 @@ class UpdateServiceView(APIView):
         serializer = ServiceSerializer(service, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "O serviço foi atualizado com sucesso"}, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         

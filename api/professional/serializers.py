@@ -22,11 +22,11 @@ class WorkingPlanSerializer(serializers.ModelSerializer):
         # Extrai os dados de break_time
         break_time_data = validated_data.pop('break_time', [])
         
-        # Verifica se já existe um WorkingPlan com o mesmo day_of_week para o profissional
+        # Obtém ou cria um WorkingPlan com o mesmo day_of_week para o profissional
         professional = validated_data['professional']
         day_of_week = validated_data['day_of_week']
 
-        working_plan, created = WorkingPlan.objects.update_or_create(
+        working_plan, create = WorkingPlan.objects.update_or_create(
             professional=professional, 
             day_of_week=day_of_week, 
             defaults={
@@ -35,10 +35,8 @@ class WorkingPlanSerializer(serializers.ModelSerializer):
             }
         )
 
-        # Atualiza ou cria os BreakTimes associados
-        BreakTime.objects.filter(working_plan=working_plan).delete()
         for break_data in break_time_data:
-            BreakTime.objects.update_or_create(working_plan=working_plan, **break_data)
+            BreakTime.objects.create(working_plan=working_plan, **break_data)
 
         return working_plan
 
@@ -48,10 +46,10 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = ['id', 'name', 'time', 'value']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['time'] = instance.time.strftime("%H:%M") if instance.time else None
-        return representation
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     representation['time'] = instance.time.strftime("%H:%M") if instance.time else None
+    #     return representation
 
     def create(self, validated_data):
         return Service.objects.create(professional=self.context['professional'], **validated_data)

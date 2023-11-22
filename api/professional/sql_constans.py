@@ -15,7 +15,7 @@ GET_SCHEDULE_DATA_PROFESSIONAL = """
             json_build_object(
                 'id', serv.id,
                 'name', serv.name,
-                'time', serv.time,
+                'time', (serv.time::time),
                 'value', serv.value
             ) AS serv_list
         FROM service AS serv
