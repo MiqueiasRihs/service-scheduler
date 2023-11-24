@@ -7,9 +7,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from api.utils.scheduler_class import SchedulerClass
-from api.professional.models import Professional, WorkingPlan, Service, Holiday
+from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer, HolidaySerializer
+    ScheduleSerializer, HolidaySerializer, BlockHourSerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
@@ -215,4 +215,29 @@ class HolidayDelete(APIView):
             return Response({'message': 'Você não tem permissão para deletar este feriado.'}, status=status.HTTP_403_FORBIDDEN)
 
         holiday.delete()
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
+    
+class BlockHourList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        
+        serializer = BlockHourSerializer(data=request.data, context={'professional': professional})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        
+        date = request.query_params.get('date')
+        block_times = BlockHour.objects.filter(professional=professional, date=date).first()
+        serializer = BlockHourSerializer(block_times)
+
+        if block_times:
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
         return Response({}, status=status.HTTP_204_NO_CONTENT)

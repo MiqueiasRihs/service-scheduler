@@ -1,6 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 
 from api.professional.constants import HolidayType, HOLIDAY_TYPE_CHOICES
 
@@ -113,3 +114,19 @@ class Holiday(models.Model):
         db_table = 'holiday'
         verbose_name = "Feriado"
         verbose_name_plural = "Feriados"
+
+
+class BlockHour(models.Model):
+    date = models.DateField(unique=True)
+    hours = ArrayField(models.TimeField())
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='block_hour', verbose_name='Profissional')
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
+
+    def __str__(self):
+        return str(self.date)
+    
+    class Meta:
+        db_table = 'block_hour'
+        verbose_name = "Horário bloqueado"
+        verbose_name_plural = "Horários bloqueados"
