@@ -223,11 +223,22 @@ class BlockHourList(APIView):
 
     def post(self, request):
         professional = get_object_or_404(Professional, user=request.user)
-        
-        serializer = BlockHourSerializer(data=request.data, context={'professional': professional})
+        date = request.data.get('date')
+
+        # Verifica se já existe um BlockHour com a mesma data para o profissional
+        block_hour_instance = BlockHour.objects.filter(date=date, professional=professional).first()
+
+        if block_hour_instance:
+            # Se já existe, atualiza o registro existente
+            serializer = BlockHourSerializer(block_hour_instance, data=request.data, context={'professional': professional})
+        else:
+            # Se não existe, cria um novo
+            serializer = BlockHourSerializer(data=request.data, context={'professional': professional})
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED if not block_hour_instance else status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):

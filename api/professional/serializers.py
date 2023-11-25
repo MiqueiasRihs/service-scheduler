@@ -115,7 +115,10 @@ class HolidaySerializer(serializers.ModelSerializer):
     
 
 class BlockHourSerializer(serializers.ModelSerializer):
-    hours = serializers.SerializerMethodField()
+    hours = serializers.ListField(
+        child=serializers.TimeField(format='%H:%M'),
+        write_only=False
+    )
 
     class Meta:
         model = BlockHour
@@ -126,5 +129,17 @@ class BlockHourSerializer(serializers.ModelSerializer):
         return [time.strftime('%H:%M') for time in obj.hours]
 
     def create(self, validated_data):
-        professional = self.context['professional']
-        return BlockHour.objects.create(professional=professional, **validated_data) 
+        professional = self.context.get('professional')
+        block_hour_instance = BlockHour.objects.create(
+            professional=professional,
+            **validated_data
+        )
+        return block_hour_instance
+
+    def update(self, instance, validated_data):
+        hours = validated_data.pop('hours', [])
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.hours = hours
+        instance.save()
+        return instance
