@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, time
 
-from api.professional.models import Service, WorkingPlan, BreakTime, Holiday
+from api.professional.models import Service, WorkingPlan, BreakTime, Holiday, BlockHour
 from api.professional.constants import HolidayType
 
 from api.customer.models import Scheduler
@@ -84,7 +84,20 @@ class SchedulerClass:
                 available_times.append(current_time.strftime('%H:%M'))
             current_time += interval
         
-        print(available_times)
+        available_times = self._remove_block_hours(available_times[:-1], data_datetime)
+        return available_times
+    
+
+    def _remove_block_hours(self, available_times, date):
+        block_hour = BlockHour.objects.filter(date=date).first()
+
+        if block_hour:
+            # Converte os horários bloqueados para o formato de hora necessário
+            blocked_times_formatted = [hour.strftime('%H:%M') for hour in block_hour.hours]
+
+            # Remove os horários bloqueados da lista de horários disponíveis
+            available_times = [time for time in available_times if time not in blocked_times_formatted]
+
         return available_times
 
 
