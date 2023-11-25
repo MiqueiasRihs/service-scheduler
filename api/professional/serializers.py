@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, BlockHour
+from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, BlockHour, Vacation
 from api.professional.constants import HolidayType
 
 from api.utils.utils import to_money
@@ -143,3 +143,18 @@ class BlockHourSerializer(serializers.ModelSerializer):
         instance.hours = hours
         instance.save()
         return instance
+    
+    
+class VacationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vacation
+        fields = ['id', 'start_date', 'end_date', 'professional']
+        extra_kwargs = {'professional': {'write_only': True, 'required': False}}
+
+    def create(self, validated_data):
+        professional = self.context['professional']
+        return Vacation.objects.create(professional=professional, **validated_data)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        return representation

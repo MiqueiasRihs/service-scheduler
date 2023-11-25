@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
@@ -130,3 +131,26 @@ class BlockHour(models.Model):
         db_table = 'block_hour'
         verbose_name = "Horário bloqueado"
         verbose_name_plural = "Horários bloqueados"
+        
+        
+class Vacation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    start_date = models.DateField(verbose_name='Data de início')
+    end_date = models.DateField(verbose_name='Data de fim')
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='vacations', verbose_name='Profissional')
+    created_at = models.DateTimeField('Criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('Atualizado em', auto_now=True)
+
+    def __str__(self):
+        return f"Férias de {self.professional} de {self.start_date} até {self.end_date}"
+
+    class Meta:
+        db_table = 'vacation'
+        verbose_name = "Férias"
+        verbose_name_plural = "Férias"
+        ordering = ['start_date']
+
+    def clean(self):
+        # Validação adicional para garantir que a data de início é antes da data de fim
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError('A data de início das férias deve ser anterior à data de fim.')

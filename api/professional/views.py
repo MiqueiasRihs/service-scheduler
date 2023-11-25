@@ -7,9 +7,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from api.utils.scheduler_class import SchedulerClass
-from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour
+from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour, Vacation
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer, HolidaySerializer, BlockHourSerializer
+    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
@@ -252,3 +252,37 @@ class BlockHourList(APIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class VacationList(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    """
+    List all vacations or create a new vacation.
+    """
+    def get(self, request, format=None):
+        professional = get_object_or_404(Professional, user=request.user)
+        
+        vacations = Vacation.objects.filter(professional=professional)
+        serializer = VacationSerializer(vacations, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        professional = get_object_or_404(Professional, user=request.user)
+
+        serializer = VacationSerializer(data=request.data, context={'professional': professional})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class VacationDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, vacations_id, format=None):
+        professional = get_object_or_404(Professional, user=request.user)
+        vacation = get_object_or_404(Vacation, pk=vacations_id, professional=professional)
+        vacation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
