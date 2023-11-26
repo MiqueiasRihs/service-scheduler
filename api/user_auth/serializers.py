@@ -1,13 +1,25 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
 
 from api.professional.models import Professional
+
+import re
 
 class ProfessionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Professional
         fields = ['slug', 'phone', 'store', 'interval', 'instagram', 'profile_image_path']
+
+    def validate_phone(self, value):
+        phone = re.sub(r'\D', '', value)
+
+        if len(phone) < 10 or len(phone) > 11:
+            raise ValidationError('Número de telefone inválido.')
+
+        return phone
 
 class UserSerializer(serializers.ModelSerializer):
     professional = serializers.SerializerMethodField()

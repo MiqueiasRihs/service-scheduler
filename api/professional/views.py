@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from api.utils.scheduler_class import SchedulerClass
 from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour, Vacation
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer, ProfessionalSerializer
+    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer, UpdateProfessionalSerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
@@ -38,7 +38,7 @@ class ProfessionalUpdateData(APIView):
         professional.save()
         
         # Serializando e retornando a resposta
-        serializer = ProfessionalSerializer(professional)
+        serializer = UpdateProfessionalSerializer(professional)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

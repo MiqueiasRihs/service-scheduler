@@ -1,9 +1,9 @@
 from rest_framework import status
 from rest_framework import serializers
 
+from api.professional.constants import HolidayType
 from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, \
     BlockHour, Vacation, Professional
-from api.professional.constants import HolidayType
 
 from api.exceptions import CustomValidation
 from django.contrib.auth.models import User
@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['first_name']
 
 
-class ProfessionalSerializer(serializers.ModelSerializer):
+class UpdateProfessionalSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
 
     class Meta:
