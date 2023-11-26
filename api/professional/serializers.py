@@ -50,6 +50,12 @@ class ServiceSerializer(serializers.ModelSerializer):
     #     representation = super().to_representation(instance)
     #     representation['time'] = instance.time.strftime("%H:%M") if instance.time else None
     #     return representation
+    
+    def validate_name(self, value):
+        professional = self.context['professional']
+        if Service.objects.filter(professional=professional, name=value).exists():
+            raise serializers.ValidationError("Um serviço com esse nome já existe para este profissional.")
+        return value
 
     def create(self, validated_data):
         return Service.objects.create(professional=self.context['professional'], **validated_data)
