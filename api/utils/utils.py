@@ -14,3 +14,8 @@ def to_money(amount):
         return
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
     return locale.currency(float(amount), grouping=True)
+
+
+def validate_phone(phone):
+    phone = ''.join(filter(str.isdigit, phone))
+    return phone

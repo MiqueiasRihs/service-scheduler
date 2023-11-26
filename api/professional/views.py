@@ -13,6 +13,7 @@ from api.professional.serializers import WorkingPlanSerializer, ServiceSerialize
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
+from api.utils.utils import validate_phone
 
 class ProfessionalUpdateData(APIView):
     permission_classes = [IsAuthenticated]
@@ -29,7 +30,7 @@ class ProfessionalUpdateData(APIView):
         if instagram is not None:
             professional.instagram = instagram
         if phone is not None:
-            professional.phone = phone
+            professional.phone = validate_phone(phone)
         if first_name is not None:
             professional.user.first_name = first_name
             professional.slug = professional.generate_slug(first_name)

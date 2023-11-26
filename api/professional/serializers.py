@@ -7,6 +7,9 @@ from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, \
 
 from api.exceptions import CustomValidation
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
+from api.utils.utils import validate_phone
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,7 +30,7 @@ class UpdateProfessionalSerializer(serializers.ModelSerializer):
         user = instance.user
 
         instance.instagram = validated_data.get('instagram', instance.instagram)
-        instance.phone = validated_data.get('phone', instance.phone)
+        instance.phone = validate_phone(validated_data.get('phone'))
         user.first_name = user_data.get('first_name', user.first_name)
 
         user.save()
