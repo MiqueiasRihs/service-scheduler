@@ -38,6 +38,7 @@ class SchedulerClass:
 
     def get_available_times(self, date):
         unavailable_hours = []
+        current_datetime = datetime.now()
         data_datetime = datetime.strptime(date, "%Y-%m-%d")
         
         print("WEEKDAY >>> ", data_datetime.weekday())
@@ -75,19 +76,23 @@ class SchedulerClass:
         
         available_times = []
         interval = timedelta(minutes=self.professional.interval)
-        current_time = start_time
+        current_time = datetime.strptime(working_plan.start_time, '%H:%M')
 
-        while current_time <= end_time:
+        while current_time <= datetime.strptime(working_plan.end_time, '%H:%M'):
             is_available = all(
                 current_time < break_start or current_time >= break_end
                 for break_start, break_end in unavailable_hours
             )
+            # Convertendo current_time para datetime completo para comparação
+            full_current_time = data_datetime.replace(hour=current_time.hour, minute=current_time.minute)
 
-            if is_available:
+            if is_available and full_current_time >= current_datetime:
                 available_times.append(current_time.strftime('%H:%M'))
             current_time += interval
-        
+
+        # Remoção de horários bloqueados
         available_times = self._remove_block_hours(available_times[:-1], data_datetime)
+
         return available_times
     
 
