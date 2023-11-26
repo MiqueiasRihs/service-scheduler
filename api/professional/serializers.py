@@ -1,9 +1,10 @@
+from rest_framework import status
 from rest_framework import serializers
 
 from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, BlockHour, Vacation
 from api.professional.constants import HolidayType
 
-from api.utils.utils import to_money
+from api.exceptions import CustomValidation
 
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,7 +55,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     def validate_name(self, value):
         professional = self.context['professional']
         if Service.objects.filter(professional=professional, name=value).exists():
-            raise serializers.ValidationError("Um serviço com esse nome já existe para este profissional.")
+            raise CustomValidation("Um serviço com esse nome já existe para este profissional.", status.HTTP_400_BAD_REQUEST)
         return value
 
     def create(self, validated_data):
