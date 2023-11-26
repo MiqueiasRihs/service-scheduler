@@ -278,7 +278,7 @@ class VacationList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class VacationDetail(APIView):
+class VacationDelete(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, vacations_id, format=None):

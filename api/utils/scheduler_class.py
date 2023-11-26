@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, time
 
-from api.professional.models import Service, WorkingPlan, BreakTime, Holiday, BlockHour
+from api.professional.models import Service, WorkingPlan, BreakTime, Holiday, BlockHour, Vacation
 from api.professional.constants import HolidayType
 
 from api.customer.models import Scheduler
@@ -41,6 +41,9 @@ class SchedulerClass:
         data_datetime = datetime.strptime(date, "%Y-%m-%d")
         
         print("WEEKDAY >>> ", data_datetime.weekday())
+        
+        if self._check_vacations(data_datetime, self.professional):
+            return []
 
         holiday = Holiday.objects.filter(date=data_datetime).first()
         if holiday and holiday.holiday_type == HolidayType.FULL_DAY:
@@ -99,6 +102,17 @@ class SchedulerClass:
             available_times = [time for time in available_times if time not in blocked_times_formatted]
 
         return available_times
+    
+    
+    def _check_vacations(self, date, professional):
+        vacations = Vacation.objects.filter(professional=professional)
+        for vacation in vacations:
+            date_to_compare = date.date() if isinstance(date, datetime) else date
+
+            if vacation.start_date <= date_to_compare <= vacation.end_date:
+                return True
+
+        return False
 
 
     def generate_time_slots(self, scheduler):
