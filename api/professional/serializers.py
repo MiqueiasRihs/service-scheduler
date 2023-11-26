@@ -1,10 +1,40 @@
 from rest_framework import status
 from rest_framework import serializers
 
-from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, BlockHour, Vacation
+from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, \
+    BlockHour, Vacation, Professional
 from api.professional.constants import HolidayType
 
 from api.exceptions import CustomValidation
+from django.contrib.auth.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name']
+
+
+class ProfessionalSerializer(serializers.ModelSerializer):
+    user = UserSerializer(required=True)
+
+    class Meta:
+        model = Professional
+        fields = ['user', 'instagram', 'phone']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+        user = instance.user
+
+        instance.instagram = validated_data.get('instagram', instance.instagram)
+        instance.phone = validated_data.get('phone', instance.phone)
+        user.first_name = user_data.get('first_name', user.first_name)
+
+        user.save()
+        instance.save()
+
+        return instance
+
 
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:

@@ -9,9 +9,38 @@ from rest_framework.permissions import IsAuthenticated
 from api.utils.scheduler_class import SchedulerClass
 from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour, Vacation
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer
+    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer, ProfessionalSerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
+
+
+class ProfessionalUpdateData(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+
+        # Somente permitindo a atualização do Instagram, nome e telefone
+        instagram = request.data.get('instagram')
+        phone = request.data.get('phone')
+        first_name = request.data.get('first_name')
+
+        # Atualizando o profissional com as novas informações
+        if instagram is not None:
+            professional.instagram = instagram
+        if phone is not None:
+            professional.phone = phone
+        if first_name is not None:
+            professional.user.first_name = first_name
+            professional.slug = professional.generate_slug(first_name)
+            professional.user.save()
+        
+        professional.save()
+        
+        # Serializando e retornando a resposta
+        serializer = ProfessionalSerializer(professional)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ProfessionalData(APIView):
     def get(self, request, professional_slug):
