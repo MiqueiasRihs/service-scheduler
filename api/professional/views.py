@@ -7,9 +7,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from api.utils.scheduler_class import SchedulerClass
-from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour, Vacation
+from api.professional.models import Professional, WorkingPlan, Service, Holiday, BlockHour, Vacation, Absence
 from api.professional.serializers import WorkingPlanSerializer, ServiceSerializer, CalculateServicesSerializer, \
-    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer, UpdateProfessionalSerializer
+    ScheduleSerializer, HolidaySerializer, BlockHourSerializer, VacationSerializer, UpdateProfessionalSerializer, \
+    AbsenceSerializer
 
 from api.professional.utils import get_schedule_data_professional, get_professional_data
 
@@ -316,3 +317,60 @@ class VacationDelete(APIView):
         vacation = get_object_or_404(Vacation, pk=vacations_id, professional=professional)
         vacation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class AbsenceCreate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        serializer = AbsenceSerializer(data=request.data, context={'request': request, 'professional': professional})
+
+        if serializer.is_valid():
+            serializer.save(professional=professional)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class AbsenceList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        professional = get_object_or_404(Professional, user=request.user)
+        abscences = Absence.objects.filter(professional=professional)
+        serializer = AbsenceSerializer(abscences, many=True)
+        return Response(serializer.data)
+
+
+class AbsenceUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, absence_id):
+        absence = get_object_or_404(Absence, id=absence_id)
+        professional = get_object_or_404(Professional, user=request.user)
+
+        # Verifica se o profissional que está fazendo a requisição é o mesmo associado ao feriado
+        if absence.professional != professional:
+            return Response({'message': 'Você não tem permissão para atualizar esta ausencia.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = AbsenceSerializer(absence, data=request.data, context={'professional': professional, 'instance': absence})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AbsenceDelete(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, absence_id):
+        absence = get_object_or_404(Absence, id=absence_id)
+        professional = get_object_or_404(Professional, user=request.user)
+
+        # Verifica se o profissional que está fazendo a requisição é o mesmo associado ao feriado
+        if absence.professional != professional:
+            return Response({'message': 'Você não tem permissão para deletar este feriado.'}, status=status.HTTP_403_FORBIDDEN)
+
+        absence.delete()
+        return Response({}, status=status.HTTP_204_NO_CONTENT)

@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from api.professional.constants import HolidayType
 from api.professional.models import WorkingPlan, BreakTime, Service, Holiday, \
-    BlockHour, Vacation, Professional
+    BlockHour, Vacation, Professional, Absence
 
 from api.exceptions import CustomValidation
 from django.contrib.auth.models import User
@@ -152,6 +152,51 @@ class HolidaySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Holiday.objects.create(**validated_data)
+    
+
+class AbsenceSerializer(serializers.ModelSerializer):
+    absence_type_description = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Absence
+        fields = '__all__'
+        extra_kwargs = {'professional': {'write_only': True, 'required': False}}
+
+    def get_absence_type_description(self, obj):
+        return obj.get_absence_type_display()
+
+    def validate(self, data):
+        # Extrair dia e mês da data do feriado
+        absence_date = data['date']
+        day = absence_date.day
+        month = absence_date.month
+
+        # Verificar se existe um feriado com a mesma data (dia e mês) e professional
+        query = Absence.objects.filter(
+            date__month=month, 
+            date__day=day, 
+            professional=self.context['professional']
+        )
+
+        if 'instance' in self.context:
+            query = query.exclude(pk=self.context['instance'].pk)
+
+        # Verificar se existem feriados duplicados
+        if query.exists():
+            raise serializers.ValidationError({
+                'message': 'Já existe uma ausencia cadastrado para essa data para o profissional selecionado.'
+            })
+            
+        if data['absence_type'] == HolidayType.HALF_DAY:
+            if not data.get('start_time') or not data.get('end_time'):
+                raise serializers.ValidationError({
+                    "message":"Para ausencias de meio horário, a hora de inicio e hora de término são obrigatórios."
+                })
+
+        return data
+
+    def create(self, validated_data):
+        return Absence.objects.create(**validated_data)
     
 
 class BlockHourSerializer(serializers.ModelSerializer):

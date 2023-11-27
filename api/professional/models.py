@@ -115,9 +115,29 @@ class Holiday(models.Model):
         db_table = 'holiday'
         verbose_name = "Feriado"
         verbose_name_plural = "Feriados"
+        
+
+class Absence(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    date = models.DateField(verbose_name="Data")
+    start_time = models.CharField('Hora de início', blank=True, null=True)
+    end_time = models.CharField('Hora de término', blank=True, null=True)
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='absence', verbose_name='Profissional')
+    absence_type = models.SmallIntegerField(choices=HOLIDAY_TYPE_CHOICES, default=HolidayType.FULL_DAY, verbose_name="Tipo de Ausência")
+    created_at = models.DateTimeField('criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('atualizado em ', auto_now_add=True)
+
+    def __str__(self):
+        return self.date
+
+    class Meta:
+        db_table = 'absence'
+        verbose_name = "Ausência"
+        verbose_name_plural = "Ausências"
 
 
 class BlockHour(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField(unique=True)
     hours = ArrayField(models.TimeField())
     professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name='block_hour', verbose_name='Profissional')
