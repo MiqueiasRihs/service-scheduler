@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, time
 
-from api.professional.models import Service, WorkingPlan, BreakTime, Holiday, BlockHour, Vacation
+from api.professional.models import Service, WorkingPlan, BreakTime, Holiday, BlockHour, Vacation, Absence
 from api.professional.constants import HolidayType
 
 from api.customer.models import Scheduler
@@ -92,9 +92,39 @@ class SchedulerClass:
 
         # Remoção de horários bloqueados
         available_times = self._remove_block_hours(available_times[:-1], data_datetime)
+        available_times = self._check_absences(data_datetime, available_times)
 
         return available_times
     
+    
+    def _check_absences(self, date, available_times):
+        absences = Absence.objects.filter(professional=self.professional, date=date)
+        
+        # Converter available_times para objetos datetime.time
+        available_times_as_time_objects = [
+            datetime.strptime(time_str, "%H:%M").time() for time_str in available_times
+        ]
+        
+        # Verificar ausências e remover horários conflitantes
+        for absence in absences:
+            if absence.absence_type == HolidayType.FULL_DAY:
+                # Se for uma ausência de dia inteiro, limpar todos os horários disponíveis
+                return []
+            elif absence.absence_type == HolidayType.HALF_DAY:
+                # Converter horários de início e término para objetos datetime.time
+                start_time = datetime.strptime(absence.start_time, "%H:%M").time()
+                end_time = datetime.strptime(absence.end_time, "%H:%M").time()
+                
+                # Filtrar os horários disponíveis removendo aqueles que estão dentro do intervalo de ausência
+                available_times_as_time_objects = [
+                    time_obj for time_obj in available_times_as_time_objects
+                    if not (start_time <= time_obj < end_time)
+                ]
+        
+        # Converter de volta para strings no formato HH:MM após o processamento
+        available_times = [time_obj.strftime("%H:%M") for time_obj in available_times_as_time_objects]
+        
+        return available_times
 
     def _remove_block_hours(self, available_times, date):
         block_hour = BlockHour.objects.filter(date=date).first()
