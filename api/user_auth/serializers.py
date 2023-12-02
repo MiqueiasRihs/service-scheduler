@@ -1,8 +1,11 @@
+from rest_framework import status
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+
+from api.exceptions import CustomValidation
 
 from api.professional.models import Professional
 
@@ -47,7 +50,7 @@ class SignUpSerializer(serializers.Serializer):
     def validate_email(self, value):
         # Check if the email already exists.
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Um usuário com este e-mail já existe.")
+            raise CustomValidation("Um usuário com este e-mail já existe.", status.HTTP_400_BAD_REQUEST)
         return value
 
     def create(self, validated_data):
@@ -79,7 +82,7 @@ class LoginSerializer(serializers.Serializer):
         # Authenticate the user
         user = authenticate(username=attrs['email'], password=attrs['password'])
         if not user:
-            raise serializers.ValidationError("Credenciais inválidas.")
+            raise CustomValidation("Credenciais inválidas.", status.HTTP_400_BAD_REQUEST)
         # If authentication is successful, return the user instance
         attrs['user'] = user
         return attrs
