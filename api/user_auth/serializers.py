@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
 from api.exceptions import CustomValidation
@@ -44,7 +45,7 @@ class SignUpSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     email = serializers.EmailField(max_length=250)
     phone = serializers.CharField(max_length=15)
-    instagram = serializers.CharField(max_length=100, required=False)
+    instagram = serializers.CharField(max_length=100, allow_blank=True, allow_null=True, required=False)
     password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
@@ -75,8 +76,15 @@ class SignUpSerializer(serializers.Serializer):
         return UserSerializer(instance).data
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    
+    def validate_email(self, value):
+        try:
+            validate_email(value)
+            return value
+        except ValidationError as e:
+            raise CustomValidation("Informe um endereço de email válido.", status.HTTP_400_BAD_REQUEST)
 
     def validate(self, attrs):
         # Authenticate the user
